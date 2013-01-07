@@ -1,5 +1,5 @@
 before_install:
-  - sudo npm install vows
+  - npm install vows
   - sudo npm install vows -g
 language: node_js
 node_js:

@@ -23,6 +23,9 @@ start pupil
 
 You should secure the pupil port (4942), as pupil itself does not have any built-in security mechanisms.
 
+## Community
+
+There's an IRC channel on freenode called #pupil.
 
 ## License
 
