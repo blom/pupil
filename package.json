@@ -18,5 +18,11 @@
     "websocket" : "*",
     "express": "3.0.0",
     "ejs": "*"
+  },
+  "scripts": {
+    "test": "vows test/*.js --spec"
+  },
+  "devDependencies": {
+    "vows": "0.5.x"
   }
 }
