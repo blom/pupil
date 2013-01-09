@@ -1,10 +1,14 @@
 var fs = require('fs');
 
 function hasPlugin() {
-  if ( fs.statSync('/proc/stat').isFile() ) {
-    return ['cpu','processes','ctxt'];
-  }
-  else {
+  try {
+    if ( fs.statSync('/proc/stat').isFile() ) {
+      return ['cpu','processes','ctxt'];
+    }
+    else {
+      return false;
+    }
+  } catch (err) {
     return false;
   }
 }
