@@ -68,10 +68,19 @@ function PupilGrapher(host, name, data) {
     Object.keys(data.data).forEach(function (d) {
       var realval;
       if ( self.type === 'counter' ) {
-        realval = parseInt(data.data[d],10) - self.lastval[d];
-        self.lastval[d] = parseInt(data.data[d],10);
+        if ( typeof data.data[d] === 'Number' ) {
+          realval = data.data[d] - self.lastval[d];
+          self.lastval[d] = data.data[d];
+        } else {
+          realval = parseInt(data.data[d],10) - self.lastval[d];
+          self.lastval[d] = parseInt(data.data[d],10);
+        }
       } else {
-        realval = parseInt(data.data[d],10);
+        if ( typeof data.data[d] === 'Number' ) {
+          realval = data.data[d];
+        } else {
+          realval = parseInt(data.data[d],10);
+        }
       }
       self.seriesData[d].push({ x: (parseInt(data.time, 10) / 1000), y: realval });
       self.seriesDesc[i].data = self.seriesData[d].slice(-300);
