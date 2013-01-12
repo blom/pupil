@@ -8,7 +8,7 @@ function hasPlugin() {
       .split('\n')
       .slice(2,-1)
       .forEach(function (e) {
-        var netif = e.split(/:*\s+/)[1];
+        var netif = e.replace(/^\s+/g,'').split(/:*\s+/)[0];
         datapoints.push(netif + '.bytes');
         datapoints.push(netif + '.packets');
         datapoints.push(netif + '.errs');
@@ -30,9 +30,17 @@ function runPlugin(ret) {
     if ( err ) throw err;
 
     var d = data.split('\n').slice(2,-1).forEach(function (e) {
-      var cur = e.split(/:*\s+/);
+      var cur = e.replace(/^\s+/g,'').split(/:*\s+/);
 
-      ret('net.' + cur[1] + '.bytes', {
+      ret('net.' + cur[0] + '.bytes', {
+        time : new Date().getTime(),
+        type : 'counter',
+        data : {
+          rx : cur[1],
+          tx : cur[9]
+        }
+      });
+      ret('net.' + cur[0] + '.packets', {
         time : new Date().getTime(),
         type : 'counter',
         data : {
@@ -40,7 +48,7 @@ function runPlugin(ret) {
           tx : cur[10]
         }
       });
-      ret('net.' + cur[1] + '.packets', {
+      ret('net.' + cur[0] + '.errs', {
         time : new Date().getTime(),
         type : 'counter',
         data : {
@@ -48,7 +56,7 @@ function runPlugin(ret) {
           tx : cur[11]
         }
       });
-      ret('net.' + cur[1] + '.errs', {
+      ret('net.' + cur[0] + '.drop', {
         time : new Date().getTime(),
         type : 'counter',
         data : {
@@ -56,7 +64,7 @@ function runPlugin(ret) {
           tx : cur[12]
         }
       });
-      ret('net.' + cur[1] + '.drop', {
+      ret('net.' + cur[0] + '.fifo', {
         time : new Date().getTime(),
         type : 'counter',
         data : {
@@ -64,20 +72,12 @@ function runPlugin(ret) {
           tx : cur[13]
         }
       });
-      ret('net.' + cur[1] + '.fifo', {
+      ret('net.' + cur[0] + '.compressed', {
         time : new Date().getTime(),
         type : 'counter',
         data : {
-          rx : cur[6],
-          tx : cur[14]
-        }
-      });
-      ret('net.' + cur[1] + '.compressed', {
-        time : new Date().getTime(),
-        type : 'counter',
-        data : {
-          rx : cur[8],
-          tx : cur[16]
+          rx : cur[7],
+          tx : cur[15]
         }
       });
     })
