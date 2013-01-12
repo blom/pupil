@@ -1,10 +1,13 @@
 {
-  "plugins": ["procstat","net"],
+  "plugins": ["procstat","net","diskstats"],
   "pluginConfig": {
     "mysql": {
       "username": "root",
       "password": "",
       "host": "localhost"
+    },
+    "diskstats": {
+      "ignore_patterns": ["ram","loop"]
     }
   }
 }
