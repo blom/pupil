@@ -1,13 +1,16 @@
-var mysql;
-var conn;
+var fs          = require('fs')
+  , pupilPlugin = require('../lib/pupilplugin')
+  , mysql       = new pupilPlugin()
 
-function setup(config) {
+var client;
+
+mysql.prototype.setup = function (config) {
   try {
-    mysql = require('mysql-libmysqlclient');
+    client = require('mysql-libmysqlclient');
 
     try {
-      conn = mysql.createConnectionSync();
-      conn.connectSync(config.host,config.username,config.password,'information_schema');
+      this.conn = client.createConnectionSync();
+      this.conn.connectSync(config.host,config.username,config.password,'information_schema');
     } catch(err) {
       console.log('mysql: Unable to connect to database.');
     }
@@ -15,10 +18,10 @@ function setup(config) {
     console.log(err);
     console.log('mysql: mysql-libmysqlclient failed to load. (May not be installed or built correctly)');
   }
-}
+};
 
-function hasPlugin() {
-  if ( conn ) {
+mysql.prototype.test = function () {
+  if ( this.conn ) {
     return ['commands',
             'handlers',
             'network_traffic',
@@ -35,9 +38,9 @@ function hasPlugin() {
   } else {
     return false;
   }
-}
+};
 
-function sendStats(stats, ret) {
+mysql.prototype.sendStats = function (stats, ret) {
   ret('mysql.commands', {
     time: new Date().getTime(),
     name: 'mysql.commands',
@@ -196,10 +199,11 @@ function sendStats(stats, ret) {
     }
   });
 
-}
+};
 
-function gatherInnoDBBufferPool(stats, cb) {
-  conn.query('SELECT * FROM INNODB_BUFFER_POOL_STATS;', function(err, res) {
+mysql.prototype.gatherInnoDBBufferPool = function (stats, cb) {
+  var self = this;
+  this.conn.query('SELECT * FROM INNODB_BUFFER_POOL_STATS;', function(err, res) {
     if ( err === null ) {
       res.fetchAll(function (err, rows) {
         rows.forEach(function (row) {
@@ -209,38 +213,37 @@ function gatherInnoDBBufferPool(stats, cb) {
         });
       });
     }
-    sendStats(stats, cb);
+    self.sendStats(stats, cb);
   });
-}
-function gatherStatus(stats, cb) {
-  conn.query('SHOW GLOBAL STATUS;', function(err, res) {
-    res.fetchAll(function (err, rows) {
-      rows.forEach(function (row) {
-        stats[row.Variable_name] = row.Value;
-      });
-      gatherInnoDBBufferPool(stats, cb);
-    });
-  });
-}
-
-function gatherVariables(stats, cb) {
-  conn.query('SHOW GLOBAL VARIABLES;', function(err, res) {
-    res.fetchAll(function (err, rows) {
-      rows.forEach(function (row) {
-        stats[row.Variable_name] = row.Value;
-      });
-      gatherStatus(stats, cb);
-    });
-  });
-}
-
-function runPlugin(ret) {
-  var stats = {};
-  gatherVariables(stats, ret);
-}
-
-module.exports = {
-  test  : hasPlugin,
-  run   : runPlugin,
-  setup : setup
 };
+
+mysql.prototype.gatherStatus = function (stats, cb) {
+  var self = this;
+  this.conn.query('SHOW GLOBAL STATUS;', function(err, res) {
+    res.fetchAll(function (err, rows) {
+      rows.forEach(function (row) {
+        stats[row.Variable_name] = row.Value;
+      });
+      self.gatherInnoDBBufferPool(stats, cb);
+    });
+  });
+};
+
+mysql.prototype.gatherVariables = function (stats, cb) {
+  var self = this;
+  this.conn.query('SHOW GLOBAL VARIABLES;', function(err, res) {
+    res.fetchAll(function (err, rows) {
+      rows.forEach(function (row) {
+        stats[row.Variable_name] = row.Value;
+      });
+      self.gatherStatus(stats, cb);
+    });
+  });
+}
+
+mysql.prototype.run = function (ret) {
+  var stats = {};
+  this.gatherVariables(stats, ret);
+};
+
+module.exports = new mysql();

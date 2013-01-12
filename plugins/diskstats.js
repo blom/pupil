@@ -1,58 +1,62 @@
-var fs = require('fs');
+var fs          = require('fs')
+  , pupilPlugin = require('../lib/pupilplugin')
+  , diskstats   = new pupilPlugin()
 
-var ignore_patterns = ['loop','ram'];
 
-function should_skip(disk) {
-  var skip = false;
-  ignore_patterns.forEach(function (p) {
-    if ( disk.indexOf(p) === 0 )
-      skip = true;
-  });
-  return skip;
-}
-
-function setup(config) {
-  if ( config.ignore_patterns instanceof Array ) {
-    ignore_patterns = config.ignore_patterns;
+diskstats.prototype.should_skip = function (disk) {
+  for (var i = 0; i < this.ignore_patterns.length; i++) {
+    if ( disk.indexOf(this.ignore_patterns[i]) === 0 )
+      return true;
   }
-}
+  return false;
+};
 
-function hasPlugin() {
+diskstats.prototype.setup = function (config) {
+  if ( config.ignore_patterns instanceof Array ) {
+    this.ignore_patterns = config.ignore_patterns;
+  }
+};
+
+diskstats.prototype.test = function () {
   var datapoints = [];
 
   try {
-    fs.readFileSync('/proc/diskstats', 'utf8')
-      .split('\n')
-      .slice(2,-1)
-      .forEach(function (e) {
-        var skip = false;
-        var disk = e.replace(/^\s+/g,'').split(/:*\s+/)[2];
-        if ( should_skip(disk) === false ) {
-          datapoints.push(disk + '.iops');
-          datapoints.push(disk + '.merges');
-          datapoints.push(disk + '.sectors');
-          datapoints.push(disk + '.iotime');
-          datapoints.push(disk + '.weighted');
-          datapoints.push(disk + '.active');
-        }
+    var disks = fs.readFileSync('/proc/diskstats', 'utf8')
+                  .split('\n')
+                  .slice(2,-1);
+
+    for (var i = 0; i < disks.length; i++) {
+      var disk = disks[i].replace(/^\s+/g,'').split(/:*\s+/)[2];
+      if ( this.should_skip(disk) === false ) {
+        datapoints.push(disk + '.iops');
+        datapoints.push(disk + '.merges');
+        datapoints.push(disk + '.sectors');
+        datapoints.push(disk + '.iotime');
+        datapoints.push(disk + '.weighted');
+        datapoints.push(disk + '.active');
       }
-    );
+    }
   }
   catch (err) {
     datapoints = false;
   }
-
   return datapoints;
-}
+};
 
-function runPlugin(ret) {
+diskstats.prototype.run = function (ret) {
+  var self = this;
+
   fs.readFile('/proc/diskstats', 'utf8', function (err, data) {
     if ( err ) throw err;
 
-    var d = data.split('\n').slice(2,-1).forEach(function (e) {
-      var cur = e.replace(/^\s+/g,'').split(/:*\s+/);
+    var disks = data.split('\n')
+                .slice(2,-1);
 
-      if ( should_skip(cur[2]) === false ) {
+    for (var i = 0; i < disks.length; i++) {
+      var cur = disks[i].replace(/^\s+/g,'')
+                        .split(/:*\s+/);
+
+      if ( self.should_skip(cur[2]) === false ) {
         ret('diskstats.' + cur[2] + '.iops', {
           time : new Date().getTime(),
           type : 'counter',
@@ -100,12 +104,8 @@ function runPlugin(ret) {
           }
         });
       }
-    })
+    }
   });
-}
-
-module.exports = {
-  test : hasPlugin,
-  run  : runPlugin,
-  setup: setup
 };
+
+module.exports = new diskstats();

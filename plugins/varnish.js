@@ -1,3 +1,6 @@
+var pupilPlugin = require('../lib/pupilplugin')
+  , varnish     = new pupilPlugin()
+
 /*
   TODO: varnish_threads.
 */
@@ -6,9 +9,10 @@ try {
   varnishstat = require('varnishstat');
 } catch(err) {
   varnishstat = false;
+  console.log('Module "varnishstat" failed to load.  Plugin disabled.');
 }
 
-function hasPlugin() {
+varnish.prototype.test = function () {
   if ( varnishstat ) {
     return ['request_rate',
             'cache_hitrate',
@@ -37,7 +41,7 @@ function hasPlugin() {
   }
 }
 
-function runPlugin(ret) {
+varnish.prototype.run = function (ret) {
   var val = varnishstat.fetchStats();
 
   ret('varnish.cache_hitrate', {
@@ -258,7 +262,4 @@ function runPlugin(ret) {
 
 }
 
-module.exports = {
-  test : hasPlugin,
-  run  : runPlugin
-};
+module.exports = new varnish();

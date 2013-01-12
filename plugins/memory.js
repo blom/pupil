@@ -1,6 +1,8 @@
-var fs = require("fs");
+var fs          = require('fs')
+  , pupilPlugin = require('../lib/pupilplugin')
+  , memory      = new pupilPlugin()
 
-var hasPlugin = function () {
+memory.prototype.test = function () {
   try {
     if (fs.statSync("/proc/meminfo").isFile()) {
       return ["usage"];
@@ -9,7 +11,7 @@ var hasPlugin = function () {
   return false;
 };
 
-var runPlugin = function (ret) {
+memory.prototype.run = function (ret) {
   fs.readFile("/proc/meminfo", "utf8", function (err, data) {
     if (err) throw err;
     var memory = {};
@@ -34,7 +36,4 @@ var runPlugin = function (ret) {
   });
 };
 
-module.exports = {
-  test: hasPlugin,
-  run:  runPlugin
-};
+module.exports = new memory();

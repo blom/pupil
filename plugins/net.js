@@ -1,36 +1,43 @@
-var fs = require('fs');
+var fs          = require('fs')
+  , pupilPlugin = require('../lib/pupilplugin')
+  , net         = new pupilPlugin()
 
-function hasPlugin() {
+net.prototype.test = function () {
   var datapoints = [];
 
   try {
-    fs.readFileSync('/proc/net/dev', 'utf8')
-      .split('\n')
-      .slice(2,-1)
-      .forEach(function (e) {
-        var netif = e.replace(/^\s+/g,'').split(/:*\s+/)[0];
-        datapoints.push(netif + '.bytes');
-        datapoints.push(netif + '.packets');
-        datapoints.push(netif + '.errs');
-        datapoints.push(netif + '.drop');
-        datapoints.push(netif + '.fifo');
-        datapoints.push(netif + '.compressed');
-      }
-    );
+    var ifs = fs.readFileSync('/proc/net/dev', 'utf8')
+                .split('\n')
+                .slice(2,-1);
+    for (var i = 0; i < ifs.length; i++) {
+      var netif = ifs[i].replace(/^\s+/g,'')
+                        .split(/:*\s+/)[0];
+
+      datapoints.push(netif + '.bytes');
+      datapoints.push(netif + '.packets');
+      datapoints.push(netif + '.errs');
+      datapoints.push(netif + '.drop');
+      datapoints.push(netif + '.fifo');
+      datapoints.push(netif + '.compressed');
+    }
   }
   catch (err) {
     datapoints = false;
   }
 
   return datapoints;
-}
+};
 
-function runPlugin(ret) {
+net.prototype.run = function (ret) {
   fs.readFile('/proc/net/dev', 'utf8', function (err, data) {
     if ( err ) throw err;
 
-    var d = data.split('\n').slice(2,-1).forEach(function (e) {
-      var cur = e.replace(/^\s+/g,'').split(/:*\s+/);
+    var d = data.split('\n')
+                .slice(2,-1);
+
+    for (var i = 0; i < d.length; i++) {
+      var cur = d[i].replace(/^\s+/g,'')
+                    .split(/:*\s+/);
 
       ret('net.' + cur[0] + '.bytes', {
         time : new Date().getTime(),
@@ -80,11 +87,8 @@ function runPlugin(ret) {
           tx : cur[15]
         }
       });
-    })
+    }
   });
-}
-
-module.exports = {
-  test : hasPlugin,
-  run  : runPlugin
 };
+
+module.exports = new net();

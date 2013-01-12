@@ -1,6 +1,8 @@
-var fs = require('fs');
+var fs          = require('fs')
+  , pupilPlugin = require('../lib/pupilplugin')
+  , procstat    = new pupilPlugin()
 
-function hasPlugin() {
+procstat.prototype.test = function () {
   try {
     if ( fs.statSync('/proc/stat').isFile() ) {
       return ['cpu','processes','ctxt'];
@@ -13,7 +15,7 @@ function hasPlugin() {
   }
 }
 
-function runPlugin(ret) {
+procstat.prototype.run = function (ret) {
   fs.readFile('/proc/stat', 'utf8', function (err, data) {
     if ( err ) throw err;
 
@@ -62,7 +64,4 @@ function runPlugin(ret) {
   });
 }
 
-module.exports = {
-  test : hasPlugin,
-  run  : runPlugin
-};
+module.exports = new procstat();
