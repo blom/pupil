@@ -26,8 +26,8 @@ var runPlugin = function (ret) {
       type: "gauge",
       draw: "stacked",
       data: {
-        cached: memory.cached,
         used:   memory.memtotal - memory.memfree,
+        cached: memory.cached,
         free:   memory.memfree
       }
     });
