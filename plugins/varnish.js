@@ -201,7 +201,7 @@ varnish.prototype.run = function () {
     draw: 'line',
     data: {
       n_ban_add      : val.n_ban_add,
-      n_ban_this.dispatchire   : val.n_ban_this.dispatchire,
+      n_ban_retire   : val.n_ban_retire,
       n_ban_obj_test : val.n_ban_obj_test,
       n_ban_re_test  : val.n_ban_re_test,
       n_ban_dups     : val.n_ban_dups
