@@ -1,5 +1,10 @@
 {
-  "plugins": ["procstat","net","diskstats","memory"],
+  "plugins": [
+    { "plugin": "procstat" },
+    { "plugin": "net" },
+    { "plugin": "diskstats" },
+    { "plugin": "memory" }
+  ],
   "pluginConfig": {
     "mysql": {
       "username": "root",
