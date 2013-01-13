@@ -15,15 +15,15 @@ procstat.prototype.test = function () {
   }
 }
 
-procstat.prototype.run = function (ret) {
+procstat.prototype.run = function () {
+  var self = this;
   fs.readFile('/proc/stat', 'utf8', function (err, data) {
     if ( err ) throw err;
 
     var d = data.split('\n').forEach(function (l) {
       if ( l.match(/^cpu /) ) {
         var cpu = l.split(' ');
-        ret('procstat.cpu', {
-          time: new Date().getTime(),
+        self.dispatch('cpu', {
           type: 'counter',
           draw: 'stacked',
           data: {
@@ -41,8 +41,7 @@ procstat.prototype.run = function (ret) {
       }
       else if ( l.match(/^ctxt /) ) {
         var ctxt = l.split(' ');
-        ret('procstat.ctxt', {
-          time: new Date().getTime(),
+        self.dispatch('ctxt', {
           type: 'counter',
           data: {
             ctxt : ctxt[1]
@@ -51,8 +50,7 @@ procstat.prototype.run = function (ret) {
       }
       else if ( l.match(/^processes /) ) {
         var processes = l.split(' ');
-        ret('procstat.processes', {
-          time: new Date().getTime(),
+        self.dispatch('processes', {
           type: 'counter',
           data: {
             processes : processes[1]
@@ -64,4 +62,4 @@ procstat.prototype.run = function (ret) {
   });
 }
 
-module.exports = new procstat();
+module.exports = procstat;

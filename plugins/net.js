@@ -28,7 +28,8 @@ net.prototype.test = function () {
   return datapoints;
 };
 
-net.prototype.run = function (ret) {
+net.prototype.run = function () {
+  var self = this;
   fs.readFile('/proc/net/dev', 'utf8', function (err, data) {
     if ( err ) throw err;
 
@@ -39,48 +40,42 @@ net.prototype.run = function (ret) {
       var cur = d[i].replace(/^\s+/g,'')
                     .split(/:*\s+/);
 
-      ret('net.' + cur[0] + '.bytes', {
-        time : new Date().getTime(),
+      self.dispatch(cur[0] + '.bytes', {
         type : 'counter',
         data : {
           rx : cur[1],
           tx : cur[9]
         }
       });
-      ret('net.' + cur[0] + '.packets', {
-        time : new Date().getTime(),
+      self.dispatch(cur[0] + '.packets', {
         type : 'counter',
         data : {
           rx : cur[2],
           tx : cur[10]
         }
       });
-      ret('net.' + cur[0] + '.errs', {
-        time : new Date().getTime(),
+      self.dispatch(cur[0] + '.errs', {
         type : 'counter',
         data : {
           rx : cur[3],
           tx : cur[11]
         }
       });
-      ret('net.' + cur[0] + '.drop', {
-        time : new Date().getTime(),
+      self.dispatch(cur[0] + '.drop', {
         type : 'counter',
         data : {
           rx : cur[4],
           tx : cur[12]
         }
       });
-      ret('net.' + cur[0] + '.fifo', {
-        time : new Date().getTime(),
+      self.dispatch(cur[0] + '.fifo', {
         type : 'counter',
         data : {
           rx : cur[5],
           tx : cur[13]
         }
       });
-      ret('net.' + cur[0] + '.compressed', {
-        time : new Date().getTime(),
+      self.dispatch(cur[0] + '.compressed', {
         type : 'counter',
         data : {
           rx : cur[7],
@@ -91,4 +86,4 @@ net.prototype.run = function (ret) {
   });
 };
 
-module.exports = new net();
+module.exports = net;

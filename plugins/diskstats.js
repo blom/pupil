@@ -57,47 +57,41 @@ diskstats.prototype.run = function (ret) {
                         .split(/:*\s+/);
 
       if ( self.should_skip(cur[2]) === false ) {
-        ret('diskstats.' + cur[2] + '.iops', {
-          time : new Date().getTime(),
+        self.dispatch(cur[2] + '.iops', {
           type : 'counter',
           data : {
             reads  : cur[3],
             writes : cur[5]
           }
         });
-        ret('diskstats.' + cur[2] + '.merges', {
-          time : new Date().getTime(),
+        self.dispatch(cur[2] + '.merges', {
           type : 'counter',
           data : {
             reads  : cur[4],
             writes : cur[8]
           }
         });
-        ret('diskstats.' + cur[2] + '.sectors', {
-          time : new Date().getTime(),
+        self.dispatch(cur[2] + '.sectors', {
           type : 'counter',
           data : {
             read    : cur[5],
             written : cur[9]
           }
         });
-        ret('diskstats.' + cur[2] + '.iotime', {
-          time : new Date().getTime(),
+        self.dispatch(cur[2] + '.iotime', {
           type : 'counter',
           data : {
             ms_read  : cur[6],
             ms_write : cur[10]
           }
         });
-        ret('diskstats.' + cur[2] + '.weighted', {
-          time : new Date().getTime(),
+        self.dispatch(cur[2] + '.weighted', {
           type : 'counter',
           data : {
             iop_time  : cur[13]
           }
         });
-        ret('diskstats.' + cur[2] + '.active', {
-          time : new Date().getTime(),
+        self.dispatch(cur[2] + '.active', {
           type : 'gauge',
           data : {
             iops  : cur[11]
@@ -108,4 +102,4 @@ diskstats.prototype.run = function (ret) {
   });
 };
 
-module.exports = new diskstats();
+module.exports = diskstats;

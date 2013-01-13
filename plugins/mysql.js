@@ -40,10 +40,8 @@ mysql.prototype.test = function () {
   }
 };
 
-mysql.prototype.sendStats = function (stats, ret) {
-  ret('mysql.commands', {
-    time: new Date().getTime(),
-    name: 'mysql.commands',
+mysql.prototype.sendStats = function (stats) {
+  this.dispatch('commands', {
     type: 'counter',
     draw: 'stacked',
     data: {
@@ -59,9 +57,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       select         : stats.Com_select
     }
   });
-  ret('mysql.handlers', {
-    time: new Date().getTime(),
-    name: 'mysql.handlers',
+  this.dispatch('handlers', {
     type: 'counter',
     draw: 'stacked',
     data: {
@@ -76,9 +72,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       read_rnd_next : stats.Handler_read_rnd_next,
     }
   });
-  ret('mysql.network_traffic', {
-    time: new Date().getTime(),
-    name: 'mysql.network_traffic',
+  this.dispatch('network_traffic', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -86,9 +80,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       tx : stats.Bytes_sent
     }
   });
-  ret('mysql.select_types', {
-    time: new Date().getTime(),
-    name: 'mysql.select_types',
+  this.dispatch('select_types', {
     type: 'counter',
     draw: 'stacked',
     data: {
@@ -99,18 +91,14 @@ mysql.prototype.sendStats = function (stats, ret) {
       scan            : stats.Select_scan
     }
   });
-  ret('mysql.slow_queries', {
-    time: new Date().getTime(),
-    name: 'mysql.slow_queries',
+  this.dispatch('slow_queries', {
     type: 'counter',
     draw: 'line',
     data: {
       slow_queries : stats.Slow_queries
     }
   });
-  ret('mysql.open_current', {
-    time: new Date().getTime(),
-    name: 'mysql.open_current',
+  this.dispatch('open_current', {
     type: 'gauge',
     draw: 'line',
     data: {
@@ -120,9 +108,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       tables            : stats.Open_tables
     }
   });
-  ret('mysql.open_persecond', {
-    time: new Date().getTime(),
-    name: 'mysql.open_persecond',
+  this.dispatch('open_persecond', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -131,9 +117,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       tables            : stats.Opened_tables
     }
   });
-  ret('mysql.sorts', {
-    time: new Date().getTime(),
-    name: 'mysql.sorts',
+  this.dispatch('sorts', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -143,9 +127,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       scan         : stats.Sort_scan
     }
   });
-  ret('mysql.table_locks', {
-    time: new Date().getTime(),
-    name: 'mysql.table_locks',
+  this.dispatch('table_locks', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -153,9 +135,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       waited    : stats.Table_locks_waited
     }
   });
-  ret('mysql.tmp_tables', {
-    time: new Date().getTime(),
-    name: 'mysql.tmp_tables',
+  this.dispatch('tmp_tables', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -164,9 +144,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       files       : stats.Created_tmp_files
     }
   });
-  ret('mysql.connections_current', {
-    time: new Date().getTime(),
-    name: 'mysql.connections_current',
+  this.dispatch('connections_current', {
     type: 'gauge',
     draw: 'line',
     data: {
@@ -175,9 +153,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       threads_connected    : stats.Threads_connected
     }
   });
-  ret('mysql.connections_created', {
-    time: new Date().getTime(),
-    name: 'mysql.connections_created',
+  this.dispatch('connections_created', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -186,9 +162,7 @@ mysql.prototype.sendStats = function (stats, ret) {
       connections      : stats.Connections
     }
   });
-  ret('mysql.innodb_rows', {
-    time: new Date().getTime(),
-    name: 'mysql.innodb_rows',
+  this.dispatch('innodb_rows', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -201,7 +175,7 @@ mysql.prototype.sendStats = function (stats, ret) {
 
 };
 
-mysql.prototype.gatherInnoDBBufferPool = function (stats, cb) {
+mysql.prototype.gatherInnoDBBufferPool = function (stats) {
   var self = this;
   this.conn.query('SELECT * FROM INNODB_BUFFER_POOL_STATS;', function(err, res) {
     if ( err === null ) {
@@ -213,37 +187,37 @@ mysql.prototype.gatherInnoDBBufferPool = function (stats, cb) {
         });
       });
     }
-    self.sendStats(stats, cb);
+    self.sendStats(stats);
   });
 };
 
-mysql.prototype.gatherStatus = function (stats, cb) {
+mysql.prototype.gatherStatus = function (stats) {
   var self = this;
   this.conn.query('SHOW GLOBAL STATUS;', function(err, res) {
     res.fetchAll(function (err, rows) {
       rows.forEach(function (row) {
         stats[row.Variable_name] = row.Value;
       });
-      self.gatherInnoDBBufferPool(stats, cb);
+      self.gatherInnoDBBufferPool(stats);
     });
   });
 };
 
-mysql.prototype.gatherVariables = function (stats, cb) {
+mysql.prototype.gatherVariables = function (stats) {
   var self = this;
   this.conn.query('SHOW GLOBAL VARIABLES;', function(err, res) {
     res.fetchAll(function (err, rows) {
       rows.forEach(function (row) {
         stats[row.Variable_name] = row.Value;
       });
-      self.gatherStatus(stats, cb);
+      self.gatherStatus(stats);
     });
   });
 }
 
-mysql.prototype.run = function (ret) {
+mysql.prototype.run = function () {
   var stats = {};
-  this.gatherVariables(stats, ret);
+  this.gatherVariables(stats);
 };
 
-module.exports = new mysql();
+module.exports = mysql;

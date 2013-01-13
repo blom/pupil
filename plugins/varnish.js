@@ -41,11 +41,10 @@ varnish.prototype.test = function () {
   }
 }
 
-varnish.prototype.run = function (ret) {
+varnish.prototype.run = function () {
   var val = varnishstat.fetchStats();
 
-  ret('varnish.cache_hitrate', {
-    time: new Date().getTime(),
+  this.dispatch('cache_hitrate', {
     type: 'gauge',
     draw: 'stacked',
     data: {
@@ -54,8 +53,7 @@ varnish.prototype.run = function (ret) {
       cache_hitpass: (val.cache_hitpass / val.client_req) * 100
     }
   });
-  ret('varnish.request_rate', {
-    time: new Date().getTime(),
+  this.dispatch('request_rate', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -70,8 +68,7 @@ varnish.prototype.run = function (ret) {
       s_pass            : val.s_pass
     }
   });
-  ret('varnish.backend_traffic', {
-    time: new Date().getTime(),
+  this.dispatch('backend_traffic', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -85,8 +82,7 @@ varnish.prototype.run = function (ret) {
       backend_req      : val.backend_req
     }
   });
-  ret('varnish.objects', {
-    time: new Date().getTime(),
+  this.dispatch('objects', {
     type: 'gauge',
     draw: 'line',
     data: {
@@ -94,8 +90,7 @@ varnish.prototype.run = function (ret) {
       n_objecthead : val.n_objecthead
     }
   });
-  ret('varnish.transfer_rates', {
-    time: new Date().getTime(),
+  this.dispatch('transfer_rates', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -103,8 +98,7 @@ varnish.prototype.run = function (ret) {
       s_bodybytes : val.s_bodybytes
     }
   });
-  ret('varnish.memory_usage', {
-    time: new Date().getTime(),
+  this.dispatch('memory_usage', {
     type: 'gauge',
     draw: 'line',
     data: {
@@ -113,24 +107,21 @@ varnish.prototype.run = function (ret) {
       sms_nbytes: val.sms_nbytes
     }
   });
-  ret('varnish.objects_per_objhead', {
-    time: new Date().getTime(),
+  this.dispatch('objects_per_objhead', {
     type: 'counter',
     draw: 'line',
     data: {
       obj_per_objhead : val.n_object / val.n_objecthead
     }
   });
-  ret('varnish.losthdr', {
-    time: new Date().getTime(),
+  this.dispatch('losthdr', {
     type: 'counter',
     draw: 'line',
     data: {
       losthdr : val.losthdr
     }
   });
-  ret('varnish.obj_sendfile_vs_write', {
-    time: new Date().getTime(),
+  this.dispatch('obj_sendfile_vs_write', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -138,8 +129,7 @@ varnish.prototype.run = function (ret) {
       n_objwrite    : val.n_objwrite
     }
   });
-  ret('varnish.hcb', {
-    time: new Date().getTime(),
+  this.dispatch('hcb', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -148,8 +138,7 @@ varnish.prototype.run = function (ret) {
       hcb_insert : val.hcb_insert
     }
   });
-  ret('varnish.esi', {
-    time: new Date().getTime(),
+  this.dispatch('esi', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -157,16 +146,14 @@ varnish.prototype.run = function (ret) {
       esi_errors : val.esi_errors
     }
   });
-  ret('varnish.objoverflow', {
-    time: new Date().getTime(),
+  this.dispatch('objoverflow', {
     type: 'counter',
     draw: 'line',
     data: {
       n_objoverflow  : val.n_objoverflow
     }
   });
-  ret('varnish.session', {
-    time: new Date().getTime(),
+  this.dispatch('session', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -176,16 +163,14 @@ varnish.prototype.run = function (ret) {
       sess_linger   : val.sess_linger
     }
   });
-  ret('varnish.session_herd', {
-    time: new Date().getTime(),
+  this.dispatch('session_herd', {
     type: 'counter',
     draw: 'line',
     data: {
       sess_herd   : val.sess_herd
     }
   });
-  ret('varnish.shm_writes', {
-    time: new Date().getTime(),
+  this.dispatch('shm_writes', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -193,8 +178,7 @@ varnish.prototype.run = function (ret) {
       shm_writes    : val.shm_writes
     }
   });
-  ret('varnish.shm', {
-    time: new Date().getTime(),
+  this.dispatch('shm', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -203,8 +187,7 @@ varnish.prototype.run = function (ret) {
       shm_cycles  : val.shm_cycles
     }
   });
-  ret('varnish.allocations', {
-    time: new Date().getTime(),
+  this.dispatch('allocations', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -213,20 +196,18 @@ varnish.prototype.run = function (ret) {
       sms_nreq : val.sms_nreq
     }
   });
-  ret('varnish.purges', {
-    time: new Date().getTime(),
+  this.dispatch('purges', {
     type: 'counter',
     draw: 'line',
     data: {
       n_ban_add      : val.n_ban_add,
-      n_ban_retire   : val.n_ban_retire,
+      n_ban_this.dispatchire   : val.n_ban_this.dispatchire,
       n_ban_obj_test : val.n_ban_obj_test,
       n_ban_re_test  : val.n_ban_re_test,
       n_ban_dups     : val.n_ban_dups
     }
   });
-  ret('varnish.expunge', {
-    time: new Date().getTime(),
+  this.dispatch('expunge', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -234,8 +215,7 @@ varnish.prototype.run = function (ret) {
       n_lru_nuked : val.n_lru_nuked
     }
   });
-  ret('varnish.lru', {
-    time: new Date().getTime(),
+  this.dispatch('lru', {
     type: 'counter',
     draw: 'line',
     data: {
@@ -243,8 +223,7 @@ varnish.prototype.run = function (ret) {
       n_lru_moved : val.n_lru_moved
     }
   });
-  ret('varnish.data_structures', {
-    time: new Date().getTime(),
+  this.dispatch('data_structures', {
     type: 'gauge',
     draw: 'line',
     data: {
@@ -262,4 +241,4 @@ varnish.prototype.run = function (ret) {
 
 }
 
-module.exports = new varnish();
+module.exports = varnish;

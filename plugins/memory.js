@@ -11,7 +11,8 @@ memory.prototype.test = function () {
   return false;
 };
 
-memory.prototype.run = function (ret) {
+memory.prototype.run = function () {
+  var self = this;
   fs.readFile("/proc/meminfo", "utf8", function (err, data) {
     if (err) throw err;
     var memory = {};
@@ -23,7 +24,7 @@ memory.prototype.run = function (ret) {
       }
     });
 
-    ret("memory.usage", {
+    self.dispatch("usage", {
       time: new Date().getTime(),
       type: "gauge",
       draw: "stacked",
@@ -36,4 +37,4 @@ memory.prototype.run = function (ret) {
   });
 };
 
-module.exports = new memory();
+module.exports = memory;
