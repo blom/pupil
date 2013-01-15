@@ -5,14 +5,11 @@ var fs          = require('fs')
 procstat.prototype.test = function () {
   try {
     if ( fs.statSync('/proc/stat').isFile() ) {
-      return ['cpu','processes','ctxt'];
+      return ['cpu','processes','ctxt','p_blocked'];
     }
-    else {
-      return false;
-    }
-  } catch (err) {
-    return false;
-  }
+  } catch (err) {}
+
+  return false;
 }
 
 procstat.prototype.run = function () {
@@ -54,6 +51,17 @@ procstat.prototype.run = function () {
           type: 'counter',
           data: {
             processes : processes[1]
+          }
+        });
+      }
+      else if ( l.match(/^procs_blocked /) ) {
+        /* Would like to have procs_running included in a graph as well,
+           but its value is significantly higher at the moment pupil chooses
+           to run the plugin - leading in a misleading graph. */
+        self.dispatch('p_blocked', {
+          type: 'gauge',
+          data: {
+            blocked: l.split(' ')[1]
           }
         });
       }
