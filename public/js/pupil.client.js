@@ -2,20 +2,67 @@ window.pupilGraphers = {};
 window.pupilClients = {};
 window.pupilPlugins = {};
 
+function populateChildren(ul, childtree, host, hide) {
+  Object.keys(childtree).forEach(function (key) {
+    var li = document.createElement('li');
+    ul.appendChild(li);
+
+    if ( typeof childtree[key] === 'string' ) {
+      var a = document.createElement('a');
+      a.href = 'javascript:window.pupilClients["' + host + '"].subscribe("' + childtree[key] + '")';
+      a.innerHTML = key;
+      li.appendChild(a);
+    } else if ( typeof childtree[key] === 'object' ) {
+      var a = document.createElement('a');
+      a.innerHTML = key;
+      li.appendChild(a);
+      var uln = document.createElement('ul');
+      if ( hide ) {
+        uln.style.display = 'none';
+      } else {
+        uln.style.display = 'block';
+      }
+      li.appendChild(uln);
+      a.href = '#';
+      a.onclick = function () {
+        if(uln.style.display == 'block') {
+          uln.style.display = 'none';
+		}
+        else {
+          uln.style.display = 'block';
+		}
+      };
+      populateChildren(uln, childtree[key], host, true);
+    }
+  });
+}
+
 function PupilUpdatePluginList() {
   var cont = document.getElementById('plugins');
   while ( cont.hasChildNodes() ) {
     cont.removeChild(cont.lastChild);
   }
 
+  var ul = document.createElement('ul');
+  cont.appendChild(ul);
+
   Object.keys(window.pupilPlugins).forEach(function (host) {
+  	var levels = {};
     window.pupilPlugins[host].forEach(function (plugin) {
-      var a = document.createElement('a');
-      a.href = 'javascript:window.pupilClients["' + host + '"].subscribe("' + plugin + '")';
-      a.innerHTML = plugin;
-      cont.appendChild(a);
+      var p = plugin.split('.');
+      var prnt = levels;
+
+      for (var i = 0; i < p.length; i++) {
+        if ( prnt[p[i]] === undefined ) {
+          if ( i+1 === p.length ) { prnt[p[i]] = plugin; }
+          else { prnt[p[i]] = {}; }
+        }
+        prnt = prnt[p[i]];
+      }
     });
+  	populateChildren(ul, levels, host, true);
   });
+
 }
 
 function PupilStorePlugins(host, message) {
