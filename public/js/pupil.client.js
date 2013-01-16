@@ -65,6 +65,7 @@ function PupilGrapher(host, name, data) {
 
   this.addData = function (data) {
     var i = 0;
+    var md = {};
     Object.keys(data.data).forEach(function (d) {
       var realval;
       if ( self.type === 'counter' ) {
@@ -82,22 +83,18 @@ function PupilGrapher(host, name, data) {
           realval = parseInt(data.data[d],10);
         }
       }
-      self.seriesData[d].push({ x: (parseInt(data.time, 10) / 1000), y: realval });
-      self.seriesDesc[i].data = self.seriesData[d].slice(-300);
+      md[d] = realval;
       i++;
     });
+    self.graph.series.addData(md);
     self.graph.update();
   };
 
   this.createGraph = function (name, data) {
-
     var palette = new Rickshaw.Color.Palette( { scheme: 'munin' } );
 
     var seriesData = { };
     var seriesDesc = [ ];
-
-    self.seriesData = seriesData;
-    self.seriesDesc = seriesDesc;
 
     if ( data.type === 'counter' ) {
       self.type = 'counter';
@@ -105,20 +102,10 @@ function PupilGrapher(host, name, data) {
     }
 
     Object.keys(data.data).forEach(function (d) {
-      var firstval;
       if ( self.type === 'counter' ) {
         self.lastval[d] = parseInt(data.data[d],10);
-        firstval = 0;
-      } else {
-        firstval = parseInt(data.data[d],10);
       }
-
-      seriesData[d] = [ { x: (parseInt(data.time, 10) / 1000), y: firstval } ];
-      seriesDesc.push({
-        color: palette.color(),
-        data: seriesData[d],
-        name: d
-      });
+      seriesDesc.push({ name: d });
     });
 
     // instantiate our graph!
@@ -129,7 +116,11 @@ function PupilGrapher(host, name, data) {
       renderer: 'line',
       background: 'silver',
       interpolation: 'direct',
-      series: seriesDesc
+      series: new Rickshaw.Series.FixedDuration(seriesDesc, palette, {
+        timeInterval: 1000,
+        maxDataPoints: 300,
+        timeBase: new Date().getTime() / 1000
+      })
     });
 
     if ( typeof(data.draw) != 'undefined' && data.draw === 'stacked' ) {
