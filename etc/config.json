@@ -3,7 +3,8 @@
     { "plugin": "procstat" },
     { "plugin": "net" },
     { "plugin": "diskstats" },
-    { "plugin": "memory" }
+    { "plugin": "memory" },
+    { "plugin": "vmstat" }
   ],
   "pluginConfig": {
     "mysql": {
