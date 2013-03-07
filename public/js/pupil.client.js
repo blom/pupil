@@ -116,7 +116,7 @@ function PupilGrapher(host, name, data) {
     Object.keys(data.data).forEach(function (d) {
       var realval;
       if ( self.type === 'counter' ) {
-        if ( typeof data.data[d] === 'Number' ) {
+        if ( typeof data.data[d] === 'number' ) {
           realval = data.data[d] - self.lastval[d];
           self.lastval[d] = data.data[d];
         } else {
@@ -124,7 +124,7 @@ function PupilGrapher(host, name, data) {
           self.lastval[d] = parseInt(data.data[d],10);
         }
       } else {
-        if ( typeof data.data[d] === 'Number' ) {
+        if ( typeof data.data[d] === 'number' ) {
           realval = data.data[d];
         } else {
           realval = parseInt(data.data[d],10);
