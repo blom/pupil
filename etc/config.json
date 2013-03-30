@@ -4,7 +4,8 @@
     { "plugin": "net" },
     { "plugin": "diskstats" },
     { "plugin": "memory" },
-    { "plugin": "vmstat" }
+    { "plugin": "vmstat" },
+    { "plugin": "load" }
   ],
   "pluginConfig": {
     "mysql": {
